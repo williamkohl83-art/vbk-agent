@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Assistant VBK Wierde — William</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Barlow', sans-serif; background: #f0f0ee; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+.app { width: 100%; max-width: 420px; height: 100vh; max-height: 740px; background: #fff; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
+.header { background: #E2001A; padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.logo { width: 42px; height: 42px; background: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; color: #E2001A; flex-shrink: 0; }
+.header-info { flex: 1; }
+.header-name { font-weight: 600; font-size: 15px; color: #fff; }
+.header-sub { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+.status { display: flex; align-items: center; gap: 5px; }
+.dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.status-txt { font-size: 11px; color: rgba(255,255,255,0.9); }
+.messages { flex: 1; overflow-y: auto; padding: 14px 12px; display: flex; flex-direction: column; gap: 10px; background: #f5f5f3; scroll-behavior: smooth; }
+.msg { display: flex; flex-direction: column; max-width: 85%; }
+.msg.bot { align-self: flex-start; }
+.msg.user { align-self: flex-end; }
+.bubble { padding: 10px 13px; border-radius: 18px; font-size: 14px; line-height: 1.55; white-space: pre-line; }
+.msg.bot .bubble { background: #fff; color: #1a1a1a; border-bottom-left-radius: 4px; border: 0.5px solid #e0e0dc; }
+.msg.user .bubble { background: #E2001A; color: #fff; border-bottom-right-radius: 4px; }
+.lbl { font-size: 11px; color: #aaa; margin-top: 3px; padding: 0 4px; }
+.msg.user .lbl { text-align: right; }
+.typing-row { display: flex; flex-direction: column; max-width: 85%; align-self: flex-start; }
+.typing { display: flex; align-items: center; gap: 5px; padding: 11px 14px; background: #fff; border-radius: 18px; border-bottom-left-radius: 4px; border: 0.5px solid #e0e0dc; width: fit-content; }
+.typing span { width: 7px; height: 7px; background: #E2001A; border-radius: 50%; animation: bounce 1.2s infinite; }
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{ transform:translateY(0); opacity:0.3; } 40%{ transform:translateY(-7px); opacity:1; } }
+.chips-wrap { padding: 9px 12px 7px; background: #fff; border-top: 0.5px solid #eee; flex-shrink: 0; }
+.chips-label { font-size: 11px; color: #aaa; margin-bottom: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 12px; padding: 5px 11px; border-radius: 20px; border: 1.5px solid #E2001A; color: #E2001A; background: #fff; cursor: pointer; font-family: 'Barlow', sans-serif; transition: all 0.15s; white-space: nowrap; }
+.chip:hover { background: #E2001A; color: #fff; }
+.footer { display: flex; gap: 8px; padding: 9px 12px; background: #fff; border-top: 0.5px solid #eee; flex-shrink: 0; }
+input { flex: 1; padding: 10px 14px; border: 1.5px solid #ddd; border-radius: 24px; font-size: 14px; font-family: 'Barlow', sans-serif; outline: none; background: #f5f5f3; color: #1a1a1a; transition: border-color 0.15s; }
+input:focus { border-color: #E2001A; background: #fff; }
+.send { width: 42px; height: 42px; background: #E2001A; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
+.send:hover { background: #b50015; }
+.send:disabled { background: #ccc; cursor: default; }
+.send svg { width: 17px; height: 17px; fill: #fff; margin-left: 2px; }
+.powered { text-align: center; font-size: 10px; color: #ccc; padding: 3px 0 7px; background: #fff; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo">VBK</div>
+    <div class="header-info">
+      <div class="header-name">Assistant de William — VBK Wierde</div>
+      <div class="header-sub">Je réponds quand William n'est pas disponible 😊</div>
+    </div>
+    <div class="status">
+      <div class="dot"></div>
+      <span class="status-txt">En ligne</span>
+    </div>
+  </div>
+  <div class="messages" id="msgs">
+    <div class="msg bot">
+      <div class="bubble">Bonjour ! Je suis l'assistant de William, conseiller chez Vanden Borre Kitchen Wierde 👋
+
+William n'est pas disponible en ce moment, mais je peux répondre à toutes vos questions sur nos cuisines, budgets, délais et services.
+
+Comment puis-je vous aider ?</div>
+      <div class="lbl">Assistant de William</div>
+    </div>
+  </div>
+  <div class="chips-wrap" id="chipsWrap">
+    <div class="chips-label">Questions fréquentes</div>
+    <div class="chips">
+      <button class="chip" onclick="ask('Quel budget prévoir ?')">Budget</button>
+      <button class="chip" onclick="ask('Quels sont les délais ?')">Délais</button>
+      <button class="chip" onclick="ask('Les gammes Nobilia ?')">Gammes Nobilia</button>
+      <button class="chip" onclick="ask('La pose est incluse ?')">Pose incluse ?</button>
+      <button class="chip" onclick="ask('Vous êtes ouverts quand ?')">Horaires</button>
+      <button class="chip" onclick="ask('Comment prendre rendez-vous ?')">RDV</button>
+    </div>
+  </div>
+  <div class="footer">
+    <input type="text" id="inp" placeholder="Posez votre question..." />
+    <button class="send" id="sendBtn" onclick="send()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+  <div class="powered">Assistant virtuel · VBK Wierde · Propulsé par l'IA</div>
+</div>
+
+<script>
+const API_KEY = "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";
+
+const SYSTEM = `Tu es l'assistant virtuel de William KOHL, conseiller expert cuisine chez Vanden Borre Kitchen Wierde.
+Tu réponds aux clients quand William n'est pas disponible. Tu es son bras droit numérique.
+Tu es chaleureux, professionnel, précis, et tu renvoies vers William pour les projets concrets.
+
+IDENTITÉ :
+- Tu t'appelles "l'assistant de William"
+- Tu travailles pour William KOHL, conseiller VBK Wierde
+- En signature tu rappelles que William est disponible en showroom lun-sam 9h30-18h
+
+MAGASIN — Vanden Borre Kitchen Wierde :
+- Adresse : Chaussée de Marche 636, 5100 Wierde (N4) — grand parking gratuit
+- Horaires : lundi au samedi 9h30-18h / dimanche fermé
+- Showroom : 500 m², 10 cuisines en démonstration
+- Ouverture : fin 2019, gérant Lionel Klein (franchisé passionné)
+- Groupe : FBD Group, filiale 100% Nobilia
+- Réseau : 25+ magasins VBK en Belgique
+- Réputation : 4★ Trustpilot, 433 avis, retours excellents
+- Prix all-in garanti le plus bas du marché
+- SAV réactif sous 72h
+- Contacts : Instagram @vandenborrekitchen_wierde / Facebook VBK Wierde
+
+GAMMES NOBILIA (leader européen, fabriqué en Allemagne) :
+- LASER : entrée de gamme premium, bords laser sans joint, look épuré, groupe prix 1
+- RIVA : mélaminé, décors bois et béton tendance, excellent rapport qualité-prix
+- STRUCTURA : façades bois avec relief en profondeur, coloris Chêne Como et Noyer Milano
+- SENSO : laque véritable mat premium, la plus abordable en laque (groupe prix 3), 9 coloris dont Blanc, Jade, Corail
+- NOVALUX : laque véritable brillante haut de gamme (groupe prix 6), bestseller absolu
+- SOFTLINE : laque premium ultra-soignée, haut de gamme
+- LINE N : concept sans poignées applicable à toutes les gammes, profil horizontal encastré ou Push-to-open
+- SAKURA 2026 : nouvelle ligne esprit Japandi, cadres fins, matériaux naturels, tons doux
+- LINE ONE 2026 : LINE N + Push-to-open nBOX, ouverture douce et silencieuse
+Collection 2026 : FurnSpin (meuble bas pivotant pour angles), système table Butterfly, vitrines Air aluminium
+
+BUDGETS (all-in : meubles + livraison + pose) :
+- Entrée de gamme : à partir de 5 000€ (LASER, RIVA)
+- Milieu de gamme : 8 000€ à 15 000€ (STRUCTURA, SENSO, NOVALUX)
+- Haut de gamme : 15 000€+ (SOFTLINE, configurations premium)
+
+DÉLAIS : 6 à 13 semaines après commande signée (sur mesure = fabriqué après commande)
+
+POSE : incluse dans le prix all-in. L'espace doit être préparé avant (murs aplomb, eau, électricité).
+
+CONCEPTION : 3D dès le 1er rendez-vous avec William. Étude complète en 2 RDV (~2h chacun). Gratuit et sans engagement.
+
+ÉLECTROMÉNAGER : gamme complète via groupe Vanden Borre (Bosch, Siemens, Neff, AEG, Whirlpool...)
+
+PLANS DE TRAVAIL : stratifié, quartz, granit, céramique, bois, inox. 9 nouveaux décors 2025 dont Mystic Grey.
+
+TENDANCES 2025-2026 :
+- Naturel & Japandi (tons sable, macchiato, chêne)
+- Minimalisme sans poignées LINE N
+- Béton et gris taupe (disponible dès entrée de gamme)
+- Pastels tendance : Corail, Jade, Sky, Olive
+- Bois véritable placage Native Oak haut de gamme
+
+RÈGLES DE RÉPONSE :
+- Réponds en français uniquement
+- 3-5 phrases maximum sauf pour les listes de gammes ou informations techniques
+- Toujours chaleureux, jamais robotique
+- Pour les projets concrets (devis, dimensions, visite) → renvoie vers William en showroom
+- Si tu ne sais pas → dis-le honnêtement et invite à contacter William directement
+- Ne promets jamais de prix exact sans devis
+- Signe avec "— L'assistant de William, VBK Wierde" uniquement pour les réponses importantes`;
+
+const history = [];
+let chipsHidden = false;
+
+function scroll() {
+  const m = document.getElementById('msgs');
+  setTimeout(() => m.scrollTop = m.scrollHeight, 50);
+}
+
+function addMsg(text, role) {
+  const msgs = document.getElementById('msgs');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + role;
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.textContent = text;
+  const lbl = document.createElement('div');
+  lbl.className = 'lbl';
+  lbl.textContent = role === 'user' ? 'Vous' : 'Assistant de William';
+  wrap.appendChild(b);
+  wrap.appendChild(lbl);
+  msgs.appendChild(wrap);
+  scroll();
+}
+
+function showTyping() {
+  const msgs = document.getElementById('msgs');
+  const w = document.createElement('div');
+  w.id = 'typ';
+  w.className = 'typing-row';
+  w.innerHTML = '<div class="typing"><span></span><span></span><span></span></div><div class="lbl">Assistant de William</div>';
+  msgs.appendChild(w);
+  scroll();
+}
+
+function hideTyping() {
+  const t = document.getElementById('typ');
+  if (t) t.remove();
+}
+
+async function send() {
+  const inp = document.getElementById('inp');
+  const btn = document.getElementById('sendBtn');
+  const text = inp.value.trim();
+  if (!text || btn.disabled) return;
+
+  inp.value = '';
+  btn.disabled = true;
+
+  if (!chipsHidden) {
+    document.getElementById('chipsWrap').style.display = 'none';
+    chipsHidden = true;
+  }
+
+  addMsg(text, 'user');
+  history.push({ role: 'user', content: text });
+  showTyping();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-request-origin': 'user-owned-key'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 600,
+        system: SYSTEM,
+        messages: history
+      })
+    });
+
+    const data = await res.json();
+    hideTyping();
+
+    const reply = data?.content?.[0]?.text || "Désolé, une erreur est survenue. Passez nous voir en showroom ou contactez-nous sur @vandenborrekitchen_wierde !";
+    history.push({ role: 'assistant', content: reply });
+    addMsg(reply, 'bot');
+  } catch(e) {
+    hideTyping();
+    addMsg("Désolé, je rencontre une difficulté technique. William reste joignable en showroom du lundi au samedi, 9h30-18h !", 'bot');
+  }
+
+  btn.disabled = false;
+  inp.focus();
+}
+
+function ask(t) {
+  document.getElementById('inp').value = t;
+  send();
+}
+
+document.getElementById('inp').addEventListener('keydown', e => {
+  if (e.key === 'Enter') send();
+});
+</script>
+</body>
+</html>
